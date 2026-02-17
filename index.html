@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Raktha Sethu | The Life Bridge</title>
+    <style>
+        :root {
+            --primary-red: #8B0000;
+            --soft-red: #D32F2F;
+            --dark-charcoal: #1A1A1A;
+            --snow-white: #FFFAFA;
+            --call-green: #2e7d32;
+        }
+
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--snow-white); color: var(--dark-charcoal); }
+
+        header {
+            background: linear-gradient(135deg, var(--primary-red), #4a0000);
+            padding: 40px 20px; text-align: center; color: white;
+            clip-path: polygon(0 0, 100% 0, 100% 90%, 0% 100%);
+        }
+
+        .main-section { max-width: 1200px; margin: -20px auto 60px; padding: 0 20px; }
+        .portal-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; }
+        
+        .portal-card {
+            background: white; padding: 30px; border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center;
+        }
+
+        .btn {
+            display: inline-block; padding: 12px 25px; background: var(--dark-charcoal);
+            color: white; border-radius: 50px; font-weight: 600; cursor: pointer; border: none; width: 100%; margin-top: 10px;
+        }
+
+        /* MODAL FIXES */
+        .modal {
+            display: none; position: fixed; z-index: 10000; left: 0; top: 0;
+            width: 100%; height: 100%; background: rgba(0,0,0,0.9);
+        }
+
+        .modal-content {
+            background: white; margin: 2vh auto; padding: 20px; border-radius: 20px;
+            width: 90%; max-width: 500px; height: 90vh; display: flex; flex-direction: column;
+        }
+
+        #resultsList {
+            flex: 1; overflow-y: auto !important; margin-top: 15px;
+            padding: 10px; background: #f4f4f4; border-radius: 10px;
+        }
+
+        .result-item {
+            background: white; margin-bottom: 15px; padding: 15px;
+            border-left: 8px solid var(--primary-red); border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: block;
+        }
+
+        .phone-num { font-size: 1.2rem; font-weight: bold; color: var(--soft-red); display: block; margin: 5px 0; }
+        
+        .call-btn {
+            background: var(--call-green); color: white; padding: 10px 20px;
+            border-radius: 50px; text-decoration: none; display: inline-block; font-weight: bold;
+        }
+
+        .close-btn { float: right; font-size: 30px; cursor: pointer; color: #666; }
+        .form-group { margin-bottom: 10px; text-align: left; }
+        .form-group label { display: block; font-weight: bold; color: var(--primary-red); }
+        .form-group input, .form-group select { width: 100%; padding: 12px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 8px; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Raktha Sethu</h1>
+    <div id="heroCounter">❤️ <span id="count">0</span> Heroes Registered</div>
+</header>
+
+<main class="main-section">
+    <div class="portal-grid">
+        <div class="portal-card"><h3>Blood Donor</h3><button class="btn" onclick="openModal('donorModal')">Register Hero</button></div>
+        <div class="portal-card"><h3>Find Blood</h3><button class="btn" style="background: var(--soft-red);" onclick="openModal('receiverModal')">Search Database</button></div>
+        <div class="portal-card"><h3>Blood Bank</h3><button class="btn">Bank Login</button></div>
+        <div class="portal-card"><h3>Hospital</h3><button class="btn">Hospital Portal</button></div>
+    </div>
+</main>
+
+<div id="receiverModal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn" onclick="closeModal('receiverModal')">&times;</span>
+        <h2>Find Every Hero</h2>
+        <div class="form-group">
+            <label>Select Blood Group</label>
+            <select id="sGroup"><option>A+</option><option>B+</option><option>O+</option><option>AB+</option><option>A-</option><option>B-</option><option>O-</option><option>AB-</option></select>
+        </div>
+        <div class="form-group">
+            <label>City Name</label>
+            <input type="text" id="sCity" placeholder="Type city (e.g. Mumbai)">
+        </div>
+        <button class="btn" id="searchBtn" style="background: var(--primary-red);">Show Results</button>
+        
+        <div id="resultsList">
+            <p style="text-align: center; color: #999;">Search results will appear here...</p>
+        </div>
+    </div>
+</div>
+
+<div id="donorModal" class="modal">
+    <div class="modal-content" style="height: auto;">
+        <span class="close-btn" onclick="closeModal('donorModal')">&times;</span>
+        <div id="donorFormDiv">
+            <h2>Join the Bridge</h2>
+            <form id="donorForm">
+                <div class="form-group"><label>Full Name</label><input type="text" id="dName" required></div>
+                <div class="form-group"><label>Blood Group</label><select id="dGroup"><option>A+</option><option>B+</option><option>O+</option><option>AB+</option><option>A-</option><option>B-</option><option>O-</option><option>AB-</option></select></div>
+                <div class="form-group"><label>City</label><input type="text" id="dCity" required></div>
+                <div class="form-group"><label>Phone Number</label><input type="tel" id="dPhone" required></div>
+                <button type="submit" class="btn" style="background: var(--primary-red);">Complete Registration</button>
+            </form>
+        </div>
+        <div id="donorSuccess" style="display:none; text-align:center;">
+            <h2 style="color: var(--call-green);">💖 Hero Registered!</h2>
+            <button class="btn" onclick="closeModal('donorModal')">Close</button>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, getDocs, query, where, getCountFromServer } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyDMB_64CilXk7emYV8dzZ1fTGliE6S0w7o",
+        authDomain: "raktha-sethu-a7284.firebaseapp.com",
+        projectId: "raktha-sethu-a7284",
+        storageBucket: "raktha-sethu-a7284.firebasestorage.app",
+        messagingSenderId: "562792345820",
+        appId: "1:562792345820:web:d6c45f897c096bb2188419"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    async function refreshCount() {
+        const snap = await getCountFromServer(collection(db, "donors"));
+        document.getElementById("count").innerText = snap.data().count;
+    }
+    refreshCount();
+
+    document.getElementById("donorForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const cityVal = document.getElementById("dCity").value.toLowerCase().trim();
+        await addDoc(collection(db, "donors"), {
+            name: document.getElementById("dName").value,
+            group: document.getElementById("dGroup").value,
+            city: cityVal,
+            phone: document.getElementById("dPhone").value
+        });
+        document.getElementById("donorFormDiv").style.display = "none";
+        document.getElementById("donorSuccess").style.display = "block";
+        refreshCount();
+    });
+
+    document.getElementById("searchBtn").addEventListener("click", async () => {
+        const targetGroup = document.getElementById("sGroup").value;
+        const targetCity = document.getElementById("sCity").value.toLowerCase().trim();
+        const container = document.getElementById("resultsList");
+        
+        container.innerHTML = "<p style='text-align:center;'>Searching Cloud Database...</p>";
+
+        // Simple query by group ONLY (Avoids index errors)
+        const q = query(collection(db, "donors"), where("group", "==", targetGroup));
+        const snap = await getDocs(q);
+        
+        let finalHtml = ""; 
+        let foundCount = 0;
+
+        snap.forEach((doc) => {
+            const data = doc.data();
+            const donorCity = data.city || "";
+            
+            // Local Filter: Show if city matches or if city search is empty
+            if (targetCity === "" || donorCity.includes(targetCity)) {
+                foundCount++;
+                finalHtml += `
+                    <div class="result-item">
+                        <strong>${data.name.toUpperCase()}</strong><br>
+                        <span class="phone-num">📱 ${data.phone}</span>
+                        <span style="color:#666;">CITY: ${donorCity.toUpperCase()}</span><br>
+                        <a href="tel:${data.phone}" class="call-btn">Call Hero Now</a>
+                    </div>
+                `;
+            }
+        });
+
+        if (foundCount === 0) {
+            container.innerHTML = "<p style='text-align:center; padding:20px;'>No heroes found for " + targetGroup + " in " + targetCity + ".</p>";
+        } else {
+            container.innerHTML = `<p style='text-align:center; color:green; font-weight:bold;'>${foundCount} Heroes Found!</p>` + finalHtml;
+        }
+    });
+
+    window.openModal = (id) => {
+        document.getElementById(id).style.display = "block";
+        if(id === 'donorModal') {
+            document.getElementById("donorFormDiv").style.display = "block";
+            document.getElementById("donorSuccess").style.display = "none";
+        }
+    };
+    window.closeModal = (id) => document.getElementById(id).style.display = "none";
+</script>
+</body>
+</html>
