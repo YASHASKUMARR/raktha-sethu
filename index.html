@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Raktha Sethu | The Life Bridge</title>
+    <title>Raktha Sethu | Blood Bank Directory</title>
     <style>
         :root {
             --primary-red: #8B0000;
@@ -41,7 +41,7 @@
 
         .modal-content {
             background: white; margin: 2vh auto; padding: 20px; border-radius: 25px;
-            width: 90%; max-width: 500px; height: 90vh; display: flex; flex-direction: column; position: relative;
+            width: 95%; max-width: 800px; height: 90vh; display: flex; flex-direction: column; position: relative;
         }
 
         #resultsList, #stockResults {
@@ -55,20 +55,17 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.05);
         }
 
-        .phone-num { font-size: 1.2rem; font-weight: bold; color: var(--soft-red); display: block; }
-        .call-btn {
-            background: var(--call-green); color: white; padding: 10px;
-            border-radius: 50px; text-decoration: none; display: block; text-align: center; font-weight: bold;
-        }
-
         .close-btn { float: right; font-size: 35px; cursor: pointer; color: #bbb; }
         .form-group { margin-bottom: 15px; text-align: left; }
         .form-group label { display: block; font-weight: bold; color: var(--primary-red); }
         .form-group input, .form-group select { width: 100%; padding: 12px; box-sizing: border-box; border-radius: 10px; border: 1px solid #ccc; }
 
-        table { width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; }
-        th { background: var(--primary-red); color: white; padding: 12px; }
-        td { padding: 12px; border-bottom: 1px solid #eee; text-align: center; }
+        /* Table Styling for Desktop/Tablet */
+        table { width: 100%; border-collapse: collapse; background: white; font-size: 0.9rem; }
+        th { background: var(--primary-red); color: white; padding: 12px; position: sticky; top: 0; }
+        td { padding: 12px; border-bottom: 1px solid #eee; text-align: left; }
+        
+        .bank-call-btn { background: var(--call-green); color: white; padding: 5px 10px; text-decoration: none; border-radius: 5px; font-size: 0.8rem; }
 
         .loader { border: 4px solid #f3f3f3; border-top: 4px solid var(--primary-red); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 20px auto; display: none; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -85,67 +82,52 @@
     <div class="portal-grid">
         <div class="portal-card"><h3>Be a Hero</h3><button class="btn" onclick="openModal('donorModal')">Register Now</button></div>
         <div class="portal-card"><h3>Find Blood</h3><button class="btn" style="background: var(--soft-red);" onclick="openModal('receiverModal')">Search Donors</button></div>
-        <div class="portal-card"><h3>Bank Stock</h3><button class="btn" style="background: #333;" onclick="openModal('stockModal')">Check Units</button></div>
+        <div class="portal-card"><h3>Bank Stock</h3><button class="btn" style="background: #333;" onclick="openModal('stockModal')">Check Inventory</button></div>
         <div class="portal-card"><h3>Hospitals</h3><button class="btn">Emergency</button></div>
     </div>
 </main>
 
-<div id="receiverModal" class="modal">
-    <div class="modal-content">
-        <span class="close-btn" onclick="closeModal('receiverModal')">&times;</span>
-        <h2>Search Donors</h2>
-        <div class="form-group"><label>Group</label><select id="sGroup"><option>A+</option><option>B+</option><option>O+</option><option>AB+</option><option>A-</option><option>B-</option><option>O-</option><option>AB-</option></select></div>
-        <div class="form-group"><label>City</label><input type="text" id="sCity" placeholder="City name..."></div>
-        <button class="btn" id="searchBtn" style="background: var(--primary-red);">Find Every Hero</button>
-        <div id="loader" class="loader"></div>
-        <div id="resultsList"></div>
-    </div>
-</div>
-
 <div id="stockModal" class="modal">
     <div class="modal-content">
         <span class="close-btn" onclick="closeModal('stockModal')">&times;</span>
-        <h2>Blood Bank Inventory</h2>
+        <h2>Live Bank Inventory</h2>
         <div id="stockLoader" class="loader"></div>
         <div id="stockResults">
             <table>
-                <thead><tr><th>Group</th><th>Units</th><th>City</th></tr></thead>
+                <thead>
+                    <tr>
+                        <th>Bank Name</th>
+                        <th>Group</th>
+                        <th>Units</th>
+                        <th>City</th>
+                        <th>Contact</th>
+                    </tr>
+                </thead>
                 <tbody id="stockTableBody"></tbody>
             </table>
         </div>
-        <button class="btn" onclick="openModal('updateStockModal')" style="margin-top: 20px;">+ Update Bank Stock</button>
+        <button class="btn" onclick="openModal('updateStockModal')" style="margin-top: 20px; background: var(--primary-red);">+ Admin: Update Stock</button>
     </div>
 </div>
 
 <div id="updateStockModal" class="modal">
-    <div class="modal-content" style="height: auto;">
+    <div class="modal-content" style="height: auto; overflow-y: auto;">
         <span class="close-btn" onclick="closeModal('updateStockModal')">&times;</span>
-        <h3>Update Units</h3>
+        <h3>Update Bank Details</h3>
         <form id="stockUpdateForm">
-            <div class="form-group"><label>Group</label><select id="upGroup"><option>A+</option><option>B+</option><option>O+</option><option>AB+</option></select></div>
-            <div class="form-group"><label>Units (Bags)</label><input type="number" id="upUnits" required></div>
+            <div class="form-group"><label>Blood Bank Name</label><input type="text" id="upName" required placeholder="e.g. City Life Bank"></div>
+            <div class="form-group"><label>Blood Group</label><select id="upGroup"><option>A+</option><option>B+</option><option>O+</option><option>AB+</option><option>A-</option><option>B-</option><option>O-</option><option>AB-</option></select></div>
+            <div class="form-group"><label>Units Available</label><input type="number" id="upUnits" required></div>
+            <div class="form-group"><label>Full Address</label><input type="text" id="upAddress" required></div>
             <div class="form-group"><label>City</label><input type="text" id="upCity" required></div>
-            <button type="submit" class="btn" style="background: var(--call-green);">Update Cloud</button>
+            <div class="form-group"><label>Phone Number</label><input type="tel" id="upPhone" required></div>
+            <button type="submit" class="btn" style="background: var(--call-green);">Authorize & Save</button>
         </form>
     </div>
 </div>
 
-<div id="donorModal" class="modal">
-    <div class="modal-content" style="height: auto;">
-        <span class="close-btn" onclick="closeModal('donorModal')">&times;</span>
-        <div id="donorFormDiv">
-            <h2>Register as Hero</h2>
-            <form id="donorForm">
-                <div class="form-group"><label>Name</label><input type="text" id="dName" required></div>
-                <div class="form-group"><label>Group</label><select id="dGroup"><option>A+</option><option>B+</option><option>O+</option><option>AB+</option></select></div>
-                <div class="form-group"><label>City</label><input type="text" id="dCity" required></div>
-                <div class="form-group"><label>Phone</label><input type="tel" id="dPhone" required></div>
-                <button type="submit" class="btn">Submit</button>
-            </form>
-        </div>
-        <div id="donorSuccess" style="display:none; text-align:center;"><h2>💖 Registered!</h2></div>
-    </div>
-</div>
+<div id="receiverModal" class="modal"><div class="modal-content"><span class="close-btn" onclick="closeModal('receiverModal')">&times;</span><h2>Search Donors</h2><div class="form-group"><label>Group</label><select id="sGroup"><option>A+</option><option>B+</option><option>O+</option><option>AB+</option><option>A-</option><option>B-</option><option>O-</option><option>AB-</option></select></div><div class="form-group"><label>City</label><input type="text" id="sCity" placeholder="City name..."></div><button class="btn" id="searchBtn" style="background: var(--primary-red);">Find Every Hero</button><div id="loader" class="loader"></div><div id="resultsList"></div></div></div>
+<div id="donorModal" class="modal"><div class="modal-content" style="height: auto;"><span class="close-btn" onclick="closeModal('donorModal')">&times;</span><div id="donorFormDiv"><h2>Register as Hero</h2><form id="donorForm"><div class="form-group"><label>Name</label><input type="text" id="dName" required></div><div class="form-group"><label>Group</label><select id="dGroup"><option>A+</option><option>B+</option><option>O+</option><option>AB+</option></select></div><div class="form-group"><label>City</label><input type="text" id="dCity" required></div><div class="form-group"><label>Phone</label><input type="tel" id="dPhone" required></div><button type="submit" class="btn">Submit</button></form></div><div id="donorSuccess" style="display:none; text-align:center;"><h2>💖 Registered!</h2></div></div></div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -184,69 +166,81 @@
         refreshCount();
     });
 
-    // Search Donors (MULTI-RESULT FIX)
+    // Search Donors Logic
     document.getElementById("searchBtn").addEventListener("click", async () => {
         const group = document.getElementById("sGroup").value;
         const city = document.getElementById("sCity").value.toLowerCase().trim();
         const list = document.getElementById("resultsList");
         const loader = document.getElementById("loader");
-        
-        list.innerHTML = "";
-        loader.style.display = "block";
-
+        list.innerHTML = ""; loader.style.display = "block";
         const q = query(collection(db, "donors"), where("group", "==", group));
         const snap = await getDocs(q);
         loader.style.display = "none";
-        
-        let found = 0;
-        let allCards = "";
-
+        let found = 0; let allCards = "";
         snap.forEach(doc => {
             const d = doc.data();
             if (city === "" || d.city.includes(city)) {
                 found++;
-                allCards += `
-                    <div class="result-item">
-                        <strong>${d.name.toUpperCase()}</strong><br>
-                        <span class="phone-num">📱 ${d.phone}</span>
-                        <span>Location: ${d.city.toUpperCase()}</span><br><br>
-                        <a href="tel:${d.phone}" class="call-btn">CALL HERO</a>
-                    </div>`;
+                allCards += `<div class="result-item"><strong>${d.name.toUpperCase()}</strong><br><span style="color:var(--soft-red); font-weight:bold;">📱 ${d.phone}</span><br><span>Location: ${d.city.toUpperCase()}</span><br><br><a href="tel:${d.phone}" class="call-btn" style="background:var(--call-green); color:white; padding:10px; border-radius:50px; text-decoration:none; display:block; text-align:center;">CALL HERO</a></div>`;
             }
         });
         list.innerHTML = found > 0 ? allCards : "<p style='text-align:center;'>No donors found.</p>";
     });
 
-    // Stock Inventory Logic
+    // --- ENHANCED STOCK LOGIC ---
     window.loadStock = async () => {
         const tbody = document.getElementById("stockTableBody");
         const loader = document.getElementById("stockLoader");
-        tbody.innerHTML = "";
-        loader.style.display = "block";
+        tbody.innerHTML = ""; loader.style.display = "block";
         const snap = await getDocs(collection(db, "stock"));
         loader.style.display = "none";
         snap.forEach(doc => {
             const d = doc.data();
-            tbody.insertAdjacentHTML('beforeend', `<tr><td><b>${d.group}</b></td><td>${d.units}</td><td>${d.city.toUpperCase()}</td></tr>`);
+            tbody.insertAdjacentHTML('beforeend', `
+                <tr>
+                    <td><b>${d.bankName}</b><br><small>${d.address}</small></td>
+                    <td>${d.group}</td>
+                    <td style="color:var(--soft-red); font-weight:bold;">${d.units}</td>
+                    <td>${d.city.toUpperCase()}</td>
+                    <td><a href="tel:${d.phone}" class="bank-call-btn">Call</a></td>
+                </tr>`);
         });
     };
 
     document.getElementById("stockUpdateForm").addEventListener("submit", async (e) => {
         e.preventDefault();
+        
+        // 1. PIN Check
+        const pin = prompt("Admin PIN Required:");
+        const AUTHORIZED_PINS = ["1234", "5678", "9999"];
+        if (!AUTHORIZED_PINS.includes(pin)) { return alert("Access Denied!"); }
+
+        const cityVal = document.getElementById("upCity").value.toLowerCase().trim();
+
+        // 2. City Limit Check (Max 3 Banks)
+        const citySnap = await getDocs(query(collection(db, "stock"), where("city", "==", cityVal)));
+        
+        // Logic: Only block if this is a NEW bank being added. 
+        // For simplicity, we limit total "entries" per city to 3 in this version.
+        if (citySnap.size >= 3) {
+            return alert("Limit Reached: Only 3 banks allowed per city.");
+        }
+
         await addDoc(collection(db, "stock"), {
+            bankName: document.getElementById("upName").value,
             group: document.getElementById("upGroup").value,
             units: document.getElementById("upUnits").value,
-            city: document.getElementById("upCity").value.toLowerCase().trim()
+            address: document.getElementById("upAddress").value,
+            city: cityVal,
+            phone: document.getElementById("upPhone").value
         });
-        alert("Inventory Updated!");
+
+        alert("Database Updated!");
         closeModal('updateStockModal');
         loadStock();
     });
 
-    window.openModal = (id) => {
-        document.getElementById(id).style.display = "block";
-        if(id === 'stockModal') loadStock();
-    };
+    window.openModal = (id) => { document.getElementById(id).style.display = "block"; if(id === 'stockModal') loadStock(); };
     window.closeModal = (id) => document.getElementById(id).style.display = "none";
 </script>
 </body>
