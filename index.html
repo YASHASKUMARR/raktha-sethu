@@ -60,7 +60,6 @@
         .form-group label { display: block; font-weight: bold; color: var(--primary-red); }
         .form-group input, .form-group select { width: 100%; padding: 12px; box-sizing: border-box; border-radius: 10px; border: 1px solid #ccc; }
 
-        /* Table Styling for Desktop/Tablet */
         table { width: 100%; border-collapse: collapse; background: white; font-size: 0.9rem; }
         th { background: var(--primary-red); color: white; padding: 12px; position: sticky; top: 0; }
         td { padding: 12px; border-bottom: 1px solid #eee; text-align: left; }
@@ -80,7 +79,7 @@
 
 <main class="main-section">
     <div class="portal-grid">
-        <div class="portal-card"><h3>Be a Hero</h3><button class="btn" onclick="openModal('donorModal')">Register Now</button></div>
+        <div class="portal-card"><h3>DONOR (Be a Hero)</h3><button class="btn" onclick="openModal('donorModal')">Register Now</button></div>
         <div class="portal-card"><h3>Find Blood</h3><button class="btn" style="background: var(--soft-red);" onclick="openModal('receiverModal')">Search Donors</button></div>
         <div class="portal-card"><h3>Bank Stock</h3><button class="btn" style="background: #333;" onclick="openModal('stockModal')">Check Inventory</button></div>
         <div class="portal-card"><h3>Hospitals</h3><button class="btn">Emergency</button></div>
@@ -114,12 +113,13 @@
     <div class="modal-content" style="height: auto; overflow-y: auto;">
         <span class="close-btn" onclick="closeModal('updateStockModal')">&times;</span>
         <h3>Update Bank Details</h3>
+        <p style="font-size: 0.8rem; color: #666;">Enter bank details and verify using your secret PIN.</p>
         <form id="stockUpdateForm">
-            <div class="form-group"><label>Blood Bank Name</label><input type="text" id="upName" required placeholder="e.g. City Life Bank"></div>
+            <div class="form-group"><label>Blood Bank Name</label><input type="text" id="upName" required></div>
             <div class="form-group"><label>Blood Group</label><select id="upGroup"><option>A+</option><option>B+</option><option>O+</option><option>AB+</option><option>A-</option><option>B-</option><option>O-</option><option>AB-</option></select></div>
             <div class="form-group"><label>Units Available</label><input type="number" id="upUnits" required></div>
-            <div class="form-group"><label>Full Address</label><input type="text" id="upAddress" required></div>
             <div class="form-group"><label>City</label><input type="text" id="upCity" required></div>
+            <div class="form-group"><label>Full Address</label><input type="text" id="upAddress" required></div>
             <div class="form-group"><label>Phone Number</label><input type="tel" id="upPhone" required></div>
             <button type="submit" class="btn" style="background: var(--call-green);">Authorize & Save</button>
         </form>
@@ -131,7 +131,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, query, where, getCountFromServer } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, getDocs, query, where, getCountFromServer, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyDMB_64CilXk7emYV8dzZ1fTGliE6S0w7o",
@@ -145,14 +145,12 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // Refresh Hero Count
     async function refreshCount() {
         const snap = await getCountFromServer(collection(db, "donors"));
         document.getElementById("count").innerText = snap.data().count;
     }
     refreshCount();
 
-    // Register Donor
     document.getElementById("donorForm").addEventListener("submit", async (e) => {
         e.preventDefault();
         await addDoc(collection(db, "donors"), {
@@ -166,7 +164,6 @@
         refreshCount();
     });
 
-    // Search Donors Logic
     document.getElementById("searchBtn").addEventListener("click", async () => {
         const group = document.getElementById("sGroup").value;
         const city = document.getElementById("sCity").value.toLowerCase().trim();
@@ -187,7 +184,6 @@
         list.innerHTML = found > 0 ? allCards : "<p style='text-align:center;'>No donors found.</p>";
     });
 
-    // --- ENHANCED STOCK LOGIC ---
     window.loadStock = async () => {
         const tbody = document.getElementById("stockTableBody");
         const loader = document.getElementById("stockLoader");
@@ -207,35 +203,88 @@
         });
     };
 
+    document.getElementById("upName").addEventListener("blur", async () => {
+        const name = document.getElementById("upName").value.toLowerCase().trim();
+        const city = document.getElementById("upCity").value.toLowerCase().trim();
+        if(!name || !city) return;
+        const q = query(collection(db, "stock"), where("city", "==", city), where("bankName", "==", name));
+        const snap = await getDocs(q);
+        if(!snap.empty) {
+            const existing = snap.docs[0].data();
+            document.getElementById("upAddress").value = existing.address;
+            document.getElementById("upPhone").value = existing.phone;
+        }
+    });
+
     document.getElementById("stockUpdateForm").addEventListener("submit", async (e) => {
         e.preventDefault();
         
-        // 1. PIN Check
-        const pin = prompt("Admin PIN Required:");
-        const AUTHORIZED_PINS = ["1234", "5678", "9999"];
-        if (!AUTHORIZED_PINS.includes(pin)) { return alert("Access Denied!"); }
+        const pinInput = prompt("ADMIN AUTHORIZATION REQUIRED\nPlease enter your unique PIN:");
+        const VALID_PINS = ["7777", "8888", "9999"];
 
-        const cityVal = document.getElementById("upCity").value.toLowerCase().trim();
-
-        // 2. City Limit Check (Max 3 Banks)
-        const citySnap = await getDocs(query(collection(db, "stock"), where("city", "==", cityVal)));
-        
-        // Logic: Only block if this is a NEW bank being added. 
-        // For simplicity, we limit total "entries" per city to 3 in this version.
-        if (citySnap.size >= 3) {
-            return alert("Limit Reached: Only 3 banks allowed per city.");
+        if (!VALID_PINS.includes(pinInput)) {
+            alert("🛑 Access Denied: Invalid Authorization PIN.");
+            return;
         }
 
-        await addDoc(collection(db, "stock"), {
-            bankName: document.getElementById("upName").value,
-            group: document.getElementById("upGroup").value,
-            units: document.getElementById("upUnits").value,
-            address: document.getElementById("upAddress").value,
-            city: cityVal,
-            phone: document.getElementById("upPhone").value
+        const bankName = document.getElementById("upName").value.trim();
+        const group = document.getElementById("upGroup").value;
+        const units = document.getElementById("upUnits").value;
+        const city = document.getElementById("upCity").value.toLowerCase().trim();
+        const address = document.getElementById("upAddress").value;
+        const phone = document.getElementById("upPhone").value;
+
+        const allStockSnap = await getDocs(collection(db, "stock"));
+        let pinOwner = null;
+        let bankOwnerPin = null;
+
+        allStockSnap.forEach(d => {
+            const data = d.data();
+            if (data.assignedPin === pinInput && data.bankName.toLowerCase() !== bankName.toLowerCase()) {
+                pinOwner = data.bankName;
+            }
+            if (data.bankName.toLowerCase() === bankName.toLowerCase() && data.assignedPin !== pinInput) {
+                bankOwnerPin = data.assignedPin;
+            }
         });
 
-        alert("Database Updated!");
+        if (pinOwner) {
+            alert(`❌ PIN Conflict: This PIN is already in use by another blood bank.`);
+            return;
+        }
+
+        if (bankOwnerPin) {
+            alert(`❌ Access Denied: This bank is locked to a different admin PIN.`);
+            return;
+        }
+
+        const citySnap = await getDocs(query(collection(db, "stock"), where("city", "==", city)));
+        let uniqueBanks = new Set();
+        citySnap.forEach(d => uniqueBanks.add(d.data().bankName.toLowerCase()));
+
+        if (!uniqueBanks.has(bankName.toLowerCase()) && uniqueBanks.size >= 3) {
+            alert("❌ Limit Reached: 3 banks already exist in this city.");
+            return;
+        }
+
+        const typeQuery = query(collection(db, "stock"), 
+            where("city", "==", city), 
+            where("bankName", "==", bankName), 
+            where("group", "==", group)
+        );
+        const typeSnap = await getDocs(typeQuery);
+
+        if (!typeSnap.empty) {
+            const docRef = doc(db, "stock", typeSnap.docs[0].id);
+            await updateDoc(docRef, { units, address, phone });
+            alert("✅ Record updated.");
+        } else {
+            await addDoc(collection(db, "stock"), {
+                bankName, group, units, address, city, phone, assignedPin: pinInput
+            });
+            alert(`✅ Registration successful.`);
+        }
+
         closeModal('updateStockModal');
         loadStock();
     });
