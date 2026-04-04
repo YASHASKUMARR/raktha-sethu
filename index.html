@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Raktha Sethu | Live Directory</title>
+    <style>
+        :root {
+            --primary-red: #8B0000; --soft-red: #D32F2F; --dark: #1A1A1A;
+            --white: #FFFAFA; --green: #2e7d32; --hosp: #4527a0;
+        }
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--white); color: var(--dark); padding-bottom: 80px; }
+        
+        header { 
+            background: linear-gradient(135deg, var(--primary-red), #4a0000); 
+            padding: 40px 20px; text-align: center; color: white; 
+            clip-path: polygon(0 0, 100% 0, 100% 90%, 0% 100%); 
+        }
+
+        .stats-bar {
+            display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; margin-top: 15px;
+        }
+        .stat-pill {
+            background: rgba(255,255,255,0.15); padding: 6px 15px; border-radius: 50px;
+            font-size: 0.85rem; border: 1px solid rgba(255,255,255,0.3); backdrop-filter: blur(5px);
+        }
+
+        .main-section { max-width: 1100px; margin: -10px auto 50px; padding: 0 20px; }
+        .portal-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+        .portal-card { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); text-align: center; }
+        
+        .btn { display: block; padding: 12px; background: var(--dark); color: white; border-radius: 50px; font-weight: 600; cursor: pointer; border: none; width: 100%; margin-top: 10px; text-decoration: none; }
+        
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(5px); }
+        .modal-content { background: white; margin: 2vh auto; padding: 25px; border-radius: 20px; width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto; position: relative; }
+        
+        .scroll-area { margin-top: 15px; padding: 10px; background: #f4f4f4; border-radius: 10px; border: 1px solid #ddd; overflow-y: auto; }
+        .result-item { background: white; margin-bottom: 10px; padding: 15px; border-left: 8px solid var(--primary-red); border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .close-btn { float: right; font-size: 30px; cursor: pointer; color: red; font-weight: bold; }
+        
+        .form-group { margin-bottom: 12px; text-align: left; }
+        .form-group label { font-weight: bold; color: var(--primary-red); font-size: 0.9rem; display: block; margin-bottom: 5px; }
+        .form-group input, .form-group select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9rem; }
+        th { background: var(--primary-red); color: white; padding: 10px; text-align: left; }
+        td { padding: 10px; border-bottom: 1px solid #ddd; }
+        .directory-tag { font-size: 0.7rem; background: #eee; padding: 2px 6px; border-radius: 4px; color: #666; }
+
+        .emergency-btn {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            background: #ff0000; color: white; padding: 15px 40px; border-radius: 50px;
+            font-weight: 800; font-size: 1.1rem; border: 4px solid white;
+            box-shadow: 0 0 20px rgba(255,0,0,0.5); cursor: pointer; z-index: 999;
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: translateX(-50%) scale(1); }
+            50% { transform: translateX(-50%) scale(1.05); }
+            100% { transform: translateX(-50%) scale(1); }
+        }
+        .admin-section-btn { margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid #eee; }
+
+        .wa-btn {
+            background: #25D366; color: white; border: none; padding: 5px 10px; 
+            border-radius: 5px; cursor: pointer; font-size: 0.8rem; font-weight: bold;
+            margin-top: 5px; display: inline-flex; align-items: center; gap: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>RAKTHA SETHU</h1>
+    <div class="stats-bar">
+        <div class="stat-pill">🛡️ <span id="count-donors">0</span> Heroes</div>
+        <div class="stat-pill">🏥 <span id="count-banks">0</span> Blood Banks</div>
+        <div class="stat-pill">🏨 <span id="count-hospitals">0</span> Hospitals</div>
+    </div>
+</header>
+
+<main class="main-section">
+    <div class="portal-grid">
+        <div class="portal-card"><h3>DONOR</h3><button class="btn" onclick="openModal('donorModal')">Be a Hero</button></div>
+        <div class="portal-card"><h3>SEARCH</h3><button class="btn" style="background: var(--soft-red);" onclick="openModal('receiverModal')">Find Hero</button></div>
+        <div class="portal-card"><h3>BANKS</h3><button class="btn" style="background: #333;" onclick="openModal('stockModal')">Inventory</button></div>
+        <div class="portal-card"><h3>HOSPITALS</h3><button class="btn" style="background: var(--hosp);" onclick="openModal('hospitalModal')">Directory</button></div>
+    </div>
+</main>
+
+<button class="emergency-btn" onclick="openModal('emergencyModal')">🆘 EMERGENCY</button>
+
+<div id="donorModal" class="modal"><div class="modal-content"><span class="close-btn" onclick="closeModal('donorModal')">&times;</span>
+    <h2>Hero Registration</h2>
+    <form id="donorForm">
+        <div class="form-group"><label>Name</label><input type="text" id="dName" required></div>
+        <div class="form-group"><label>Age (Min 18)</label><input type="number" id="dAge" min="18" required></div>
+        <div class="form-group"><label>Blood Group</label><select id="dGroup"><option>A+</option><option>B+</option><option>O+</option><option>AB+</option><option>A-</option><option>B-</option><option>O-</option><option>AB-</option></select></div>
+        <div class="form-group"><label>City</label><input type="text" id="dCity" required></div>
+        <div class="form-group"><label>Phone</label><input type="tel" id="dPhone" required></div>
+        <button type="submit" class="btn">Register</button>
+    </form>
+</div></div>
+
+<div id="receiverModal" class="modal"><div class="modal-content"><span class="close-btn" onclick="closeModal('receiverModal')">&times;</span>
+    <h2>Find Matches</h2>
+    <div class="form-group"><label>Group Required</label><select id="sGroup"><option>A+</option><option>B+</option><option>O+</option><option>AB+</option><option>A-</option><option>B-</option><option>O-</option><option>AB-</option></select></div>
+    <div class="form-group"><label>City</label><input type="text" id="sCity" placeholder="Type city..."></div>
+    <button class="btn" id="searchBtn" style="background: var(--primary-red);">Show All Matching Donors</button>
+    <div id="resultsList" class="scroll-area" style="max-height: 300px;"></div>
+</div></div>
+
+<div id="stockModal" class="modal"><div class="modal-content"><span class="close-btn" onclick="closeModal('stockModal')">&times;</span>
+    <h2>Blood Bank Network</h2>
+    <div class="admin-section-btn"><button class="btn" style="background: #333;" onclick="openModal('bankRegModal')">Admin: Register/Update Bank</button></div>
+    <div style="background: #fff3f3; padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #ffcccc;">
+        <h4 style="margin-top:0">Quick Stock Search</h4>
+        <div class="form-group"><label>City</label><input type="text" id="invCity" placeholder="City..."></div>
+        <div class="form-group"><label>Blood Group</label><select id="invGroup"><option>A+</option><option>B+</option><option>O+</option><option>AB+</option><option>A-</option><option>B-</option><option>O-</option><option>AB-</option></select></div>
+        <button class="btn" onclick="searchBanks()">Search Stock</button>
+        <div style="overflow-x: auto;"><table><thead><tr><th>Bank</th><th>Units</th><th>Phone</th></tr></thead><tbody id="bankTable"></tbody></table></div>
+    </div>
+    <h4>All Registered Banks</h4>
+    <div id="allBanksList" class="scroll-area" style="max-height: 200px; margin-bottom: 20px;">Loading directory...</div>
+</div></div>
+
+<div id="hospitalModal" class="modal"><div class="modal-content"><span class="close-btn" onclick="closeModal('hospitalModal')">&times;</span>
+    <h2>Hospital Directory</h2>
+    <div class="form-group"><label>Search City</label><input type="text" id="hospSearchCity" placeholder="Find hospital in city..."></div>
+    <button class="btn" onclick="searchHospitals()" style="background: var(--hosp);">Search Hospitals</button>
+    <div id="hospResults" class="scroll-area" style="max-height: 300px;"></div>
+    <div class="admin-section-btn" style="border-top: 1px solid #eee; border-bottom: none; margin-top: 25px; padding-top: 15px;">
+        <button class="btn" style="background: #333;" onclick="openModal('hospAdminModal')">+ Register New Hospital</button>
+    </div>
+</div></div>
+
+<div id="emergencyModal" class="modal"><div class="modal-content"><span class="close-btn" onclick="closeModal('emergencyModal')">&times;</span>
+    <h2 style="color:red; text-align:center;">EMERGENCY BROADCAST</h2>
+    <div class="form-group"><label>City of Emergency</label><input type="text" id="emCity" placeholder="Enter city..."></div>
+    <div class="form-group"><label>Urgent Blood Group</label><select id="emGroup"><option>A+</option><option>B+</option><option>O+</option><option>AB+</option><option>A-</option><option>B-</option><option>O-</option><option>AB-</option></select></div>
+    <button class="btn" style="background:red;" onclick="triggerEmergencyAlert()">SEARCH & PREPARE ALERTS</button>
+    <div id="emResults" class="scroll-area" style="display:none; max-height: 300px;"></div>
+</div></div>
+
+<div id="bankRegModal" class="modal"><div class="modal-content"><span class="close-btn" onclick="closeModal('bankRegModal')">&times;</span>
+    <h3>Bank Admin Portal</h3>
+    <form id="bankForm">
+        <div class="form-group"><label>Bank Name</label><input type="text" id="bName" required></div>
+        <div class="form-group"><label>City</label><input type="text" id="bCity" required></div>
+        <div class="form-group"><label>Admin Password </label><input type="password" id="bPass" placeholder="" required></div>
+        <div class="form-group"><label>Blood Group</label><select id="bGroup"><option>A+</option><option>B+</option><option>O+</option><option>AB+</option><option>A-</option><option>B-</option><option>O-</option><option>AB-</option></select></div>
+        <div class="form-group"><label>Units</label><input type="number" id="bUnits" required></div>
+        <div class="form-group"><label>Phone</label><input type="tel" id="bPhone" required></div>
+        <button type="submit" class="btn">Confirm Update</button>
+    </form>
+</div></div>
+
+<div id="hospAdminModal" class="modal"><div class="modal-content"><span class="close-btn" onclick="closeModal('hospAdminModal')">&times;</span>
+    <h3>Hospital Registration</h3>
+    <form id="hospForm">
+        <div class="form-group"><label>Hospital Name</label><input type="text" id="hName" required></div>
+        <div class="form-group"><label>City</label><input type="text" id="hCity" required></div>
+        <div class="form-group"><label>Phone</label><input type="tel" id="hPhone" required></div>
+        <button type="submit" class="btn" style="background:var(--hosp);">Register Hospital</button>
+    </form>
+</div></div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, getDocs, query, where, setDoc, doc, getCountFromServer } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyDMB_64CilXk7emYV8dzZ1fTGliE6S0w7o",
+        authDomain: "raktha-sethu-a7284.firebaseapp.com",
+        projectId: "raktha-sethu-a7284",
+        storageBucket: "raktha-sethu-a7284.firebasestorage.app",
+        messagingSenderId: "562792345820",
+        appId: "1:562792345820:web:d6c45f897c096bb2188419"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    async function updateAllCounts() {
+        const donorSnap = await getCountFromServer(collection(db, "donors"));
+        const bankSnap = await getCountFromServer(collection(db, "banks"));
+        const hospSnap = await getCountFromServer(collection(db, "hospitals"));
+        document.getElementById("count-donors").innerText = donorSnap.data().count;
+        document.getElementById("count-banks").innerText = bankSnap.data().count;
+        document.getElementById("count-hospitals").innerText = hospSnap.data().count;
+        loadAllBanksDirectory();
+    }
+
+    async function loadAllBanksDirectory() {
+        const container = document.getElementById("allBanksList");
+        const snap = await getDocs(collection(db, "banks"));
+        if(snap.empty) { container.innerHTML = "No banks registered."; return; }
+        container.innerHTML = "";
+        snap.forEach(doc => {
+            const b = doc.data();
+            container.innerHTML += `<div style="padding:8px; border-bottom:1px solid #eee;"><strong>${b.name}</strong> <span class="directory-tag">${b.city.toUpperCase()}</span><br><small>📞 ${b.phone}</small></div>`;
+        });
+    }
+
+    updateAllCounts();
+
+    window.triggerEmergencyAlert = async () => {
+        const city = document.getElementById("emCity").value.toLowerCase().trim();
+        const grp = document.getElementById("emGroup").value;
+        const resultArea = document.getElementById("emResults");
+        if(!city) return alert("Please enter a city");
+        resultArea.style.display = "block";
+        resultArea.innerHTML = "Searching database...";
+
+        try {
+            const donorsQ = query(collection(db, "donors"), where("city", "==", city), where("group", "==", grp));
+            const banksQ = query(collection(db, "banks"), where("city", "==", city));
+            const hospQ = query(collection(db, "hospitals"), where("city", "==", city));
+            const [dSnap, bSnap, hSnap] = await Promise.all([getDocs(donorsQ), getDocs(banksQ), getDocs(hospQ)]);
+            resultArea.innerHTML = `<p style="color:red; font-weight:bold;">Emergency Contacts in ${city.toUpperCase()}:</p>`;
+            const msg = `🚨 *URGENT BLOOD REQUIREMENT* 🚨%0A%0ABlood Group: *${grp}*%0ALocation: *${city.toUpperCase()}*%0A%0AThis is an emergency request via *Raktha Sethu*.`;
+
+            dSnap.forEach(dDoc => {
+                const d = dDoc.data();
+                resultArea.innerHTML += `<div class="result-item" style="border-left-color:var(--green)"><strong>HERO: ${d.name}</strong><br>📞 ${d.phone}<br><button class="wa-btn" onclick="window.open('https://wa.me/${d.phone}?text=${msg}')">Send WhatsApp Alert</button></div>`;
+            });
+            bSnap.forEach(bDoc => {
+                const b = bDoc.data();
+                if(b.stock && parseInt(b.stock[grp]) > 0) {
+                    resultArea.innerHTML += `<div class="result-item" style="border-left-color:orange"><strong>BANK: ${b.name}</strong><br>Stock: ${b.stock[grp]} Units | 📞 ${b.phone}<br><button class="wa-btn" onclick="window.open('https://wa.me/${b.phone}?text=${msg}')">Contact Bank</button></div>`;
+                }
+            });
+            hSnap.forEach(hDoc => {
+                const h = hDoc.data();
+                resultArea.innerHTML += `<div class="result-item" style="border-left-color:var(--hosp)"><strong>HOSPITAL: ${h.name}</strong><br>🏥 ${h.phone}<br><button class="wa-btn" onclick="window.open('https://wa.me/${h.phone}?text=${msg}')">Alert Hospital</button></div>`;
+            });
+            if(resultArea.innerHTML.includes("Searching")) resultArea.innerHTML = "No matching contacts found.";
+        } catch (e) { alert("Error during lookup"); }
+    };
+
+    document.getElementById("bankForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const nameInput = document.getElementById("bName").value.trim();
+        const cityInput = document.getElementById("bCity").value.toLowerCase().trim();
+        const passInput = document.getElementById("bPass").value.trim();
+        const groupInput = document.getElementById("bGroup").value;
+        const unitsInput = document.getElementById("bUnits").value;
+        const phoneInput = document.getElementById("bPhone").value;
+
+        // 1. Validate password format
+        if (!["777", "888", "999"].includes(passInput)) { 
+            alert(" Error"); 
+            return; 
+        }
+
+        // 2. Fetch all banks in the same city for validation
+        const q = query(collection(db, "banks"), where("city", "==", cityInput));
+        const snap = await getDocs(q);
+        
+        let cityBanks = [];
+        snap.forEach(doc => cityBanks.push({ id: doc.id, ...doc.data() }));
+
+        // 3. Check if we are updating an EXISTING bank or creating a NEW one
+        const existingByName = cityBanks.find(b => b.name.toLowerCase() === nameInput.toLowerCase());
+
+        if (existingByName) {
+            // SCENARIO: UPDATING STOCK
+            if (existingByName.password !== passInput) { 
+                alert("Auth Failed: Incorrect password for this existing bank."); 
+                return; 
+            }
+            
+            let s = existingByName.stock || {};
+            s[groupInput] = unitsInput;
+            
+            await setDoc(doc(db, "banks", existingByName.id), { 
+                stock: s, 
+                phone: phoneInput, 
+                name: nameInput 
+            }, { merge: true });
+            
+            alert("Stock Updated Successfully!");
+        } else {
+            // SCENARIO: NEW BANK REGISTRATION
+            
+            // Check Rule 1: Max 3 banks per city
+            if (cityBanks.length >= 3) { 
+                alert(`Limit Reached: Only 3 banks allowed per city. ${cityInput.toUpperCase()} is full.`); 
+                return; 
+            }
+
+            // Check Rule 2: Password must be different from others in the same city
+            const passwordTaken = cityBanks.some(b => b.password === passInput);
+            if (passwordTaken) {
+                alert(`ERROR:PASSWORD IS WORNG`);
+                return;
+            }
+
+            // All rules passed -> Register new bank
+            let s = {};
+            s[groupInput] = unitsInput;
+            
+            await addDoc(collection(db, "banks"), { 
+                name: nameInput, 
+                city: cityInput, 
+                password: passInput, 
+                phone: phoneInput, 
+                stock: s 
+            });
+            
+            alert("New Bank Registered Successfully!");
+            updateAllCounts();
+        }
+
+        closeModal('bankRegModal'); 
+        document.getElementById("bankForm").reset();
+    });
+
+    document.getElementById("searchBtn").addEventListener("click", async () => {
+        const grp = document.getElementById("sGroup").value;
+        const city = document.getElementById("sCity").value.toLowerCase().trim();
+        const list = document.getElementById("resultsList");
+        list.innerHTML = "Searching...";
+        const q = query(collection(db, "donors"), where("group", "==", grp));
+        const snap = await getDocs(q);
+        list.innerHTML = "";
+        snap.forEach(dDoc => {
+            const d = dDoc.data();
+            if(city === "" || d.city.includes(city)) {
+                list.innerHTML += `<div class="result-item"><strong>${d.name.toUpperCase()}</strong><br>📍 ${d.city.toUpperCase()}<br><a href="tel:${d.phone}" style="color:var(--green); font-weight:bold; text-decoration:none;">📞 Call: ${d.phone}</a></div>`;
+            }
+        });
+    });
+
+    window.searchBanks = async () => {
+        const city = document.getElementById("invCity").value.toLowerCase().trim();
+        const grp = document.getElementById("invGroup").value;
+        const table = document.getElementById("bankTable");
+        table.innerHTML = "Wait...";
+        const q = query(collection(db, "banks"), where("city", "==", city));
+        const snap = await getDocs(q);
+        table.innerHTML = "";
+        snap.forEach(doc => {
+            const b = doc.data();
+            const qty = b.stock ? b.stock[grp] : "0";
+            if (parseInt(qty) > 0) table.innerHTML += `<tr><td>${b.name}</td><td>${qty} Units</td><td>${b.phone}</td></tr>`;
+        });
+        if(table.innerHTML === "") table.innerHTML = "<tr><td colspan='3' style='text-align:center;'>No stock found.</td></tr>";
+    };
+
+    window.searchHospitals = async () => {
+        const city = document.getElementById("hospSearchCity").value.toLowerCase().trim();
+        const container = document.getElementById("hospResults");
+        container.innerHTML = "Searching...";
+        const snap = await getDocs(collection(db, "hospitals"));
+        container.innerHTML = "";
+        snap.forEach(doc => {
+            const h = doc.data();
+            if(city === "" || h.city.includes(city)) container.innerHTML += `<div class="result-item" style="border-left-color:var(--hosp);"><strong>${h.name.toUpperCase()}</strong><br>📍 ${h.city.toUpperCase()}<br><a href="tel:${h.phone}" style="color:var(--hosp); font-weight:bold;">📞 Contact: ${h.phone}</a></div>`;
+        });
+    }
+
+    document.getElementById("donorForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        await addDoc(collection(db, "donors"), {
+            name: document.getElementById("dName").value, age: document.getElementById("dAge").value,
+            group: document.getElementById("dGroup").value, city: document.getElementById("dCity").value.toLowerCase().trim(),
+            phone: document.getElementById("dPhone").value
+        });
+        alert("Hero Registered!"); closeModal('donorModal'); updateAllCounts();
+    });
+
+    document.getElementById("hospForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        await addDoc(collection(db, "hospitals"), {
+            name: document.getElementById("hName").value, city: document.getElementById("hCity").value.toLowerCase().trim(),
+            phone: document.getElementById("hPhone").value
+        });
+        alert("Hospital Registered!"); closeModal('hospAdminModal'); updateAllCounts();
+    });
+
+    window.openModal = (id) => document.getElementById(id).style.display = "block";
+    window.closeModal = (id) => document.getElementById(id).style.display = "none";
+</script>
+</body>
+</html>
