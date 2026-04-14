@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Raktha Sethu | College Project Final</title>
+    <style>
+        :root {
+            --primary-red: #8B0000; --soft-red: #D32F2F; --dark: #1A1A1A;
+            --white: #FFFAFA; --green: #2e7d32; --hosp: #4527a0; --gold: #FFD700;
+        }
+        body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f4f9; color: var(--dark); padding-bottom: 100px; -webkit-tap-highlight-color: transparent; }
+        
+        header { 
+            background: linear-gradient(135deg, var(--primary-red), #500); 
+            padding: 30px 15px; text-align: center; color: white; 
+            clip-path: polygon(0 0, 100% 0, 100% 92%, 0% 100%); 
+        }
+        header h1 { margin: 0; font-size: 1.8rem; letter-spacing: 1px; }
+        header p { margin: 5px 0 0; font-size: 0.9rem; opacity: 0.9; }
+        
+        /* Mobile Optimized Tabs */
+        .nav-tabs { 
+            display: grid; grid-template-columns: repeat(2, 1fr); 
+            background: white; gap: 8px; padding: 10px; 
+            position: sticky; top: 0; z-index: 1000; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1); 
+        }
+        .tab { 
+            cursor: pointer; font-weight: bold; color: #555; 
+            padding: 12px 5px; border-radius: 8px; 
+            border: 1px solid #eee; text-align: center; font-size: 0.85rem;
+            transition: 0.3s;
+        }
+        .tab.active { background: var(--primary-red); color: white; border-color: var(--primary-red); }
+        
+        .container { width: 100%; max-width: 900px; margin: 15px auto; box-sizing: border-box; padding: 0 15px; }
+        .view-section { display: none; width: 100%; }
+        .view-section.active { display: block; animation: fadeIn 0.4s ease; }
+        
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .card { 
+            background: white; padding: 20px; border-radius: 12px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08); 
+            margin-bottom: 20px; border-top: 5px solid var(--primary-red); 
+            box-sizing: border-box;
+        }
+        .card h3 { margin-top: 0; color: var(--primary-red); font-size: 1.2rem; }
+
+        .btn { 
+            display: block; width: 100%; padding: 15px; 
+            background: var(--dark); color: white; border: none; 
+            border-radius: 10px; font-weight: bold; cursor: pointer; 
+            margin-top: 15px; font-size: 1rem; transition: transform 0.1s;
+        }
+        .btn:active { transform: scale(0.98); }
+
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 6px; font-weight: bold; color: #444; font-size: 0.9rem; }
+        .form-group input, .form-group select { 
+            width: 100%; padding: 12px; border: 1.5px solid #ddd; 
+            border-radius: 10px; box-sizing: border-box; font-size: 1rem;
+            appearance: none; -webkit-appearance: none;
+        }
+        
+        .result-item { 
+            background: #fff; padding: 15px; margin-top: 12px; 
+            border-radius: 10px; border-left: 6px solid var(--primary-red); 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05); font-size: 0.95rem;
+        }
+        .wa-link { 
+            color: var(--green); font-weight: bold; text-decoration: none; 
+            display: inline-block; margin-top: 10px; border: 1.5px solid var(--green); 
+            padding: 8px 15px; border-radius: 8px; font-size: 0.9rem;
+        }
+        
+        /* Fixed Footer Button for Mobile */
+        .emergency-btn { 
+            position: fixed; bottom: 0; width: 100%; 
+            background: #d32f2f; color: white; padding: 18px; 
+            border: none; font-weight: 900; font-size: 1.1rem; 
+            cursor: pointer; z-index: 2000; box-shadow: 0 -2px 10px rgba(0,0,0,0.2);
+        }
+
+        /* Responsive Modals */
+        .modal { display:none; position:fixed; z-index:3000; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.85); overflow-y: auto; }
+        .modal-content { 
+            background:#fff; margin:15% auto; padding:20px; 
+            border-radius:15px; width: 85%; max-width:500px; 
+            position: relative; box-sizing: border-box;
+        }
+        .close-modal { position: absolute; right: 15px; top: 5px; font-size: 28px; cursor: pointer; color: #888; }
+
+        @media (min-width: 600px) {
+            .nav-tabs { grid-template-columns: repeat(4, 1fr); }
+            header h1 { font-size: 2.5rem; }
+            .modal-content { margin: 5% auto; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>RAKTHA SETHU</h1>
+    <p>Centralized Blood Management System</p>
+</header>
+
+<div class="nav-tabs">
+    <div class="tab active" onclick="showTab('search')">Search</div>
+    <div class="tab" onclick="showTab('reg-donor')">Donor Join</div>
+    <div class="tab" onclick="showTab('reg-admin')">Admin Setup</div>
+    <div class="tab" onclick="showTab('login')">Login</div>
+</div>
+
+<div id="emModal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal" onclick="document.getElementById('emModal').style.display='none'">&times;</span>
+        <h2 style="color:red; margin-top:0;">🚨 Emergency Search</h2>
+        <div class="form-group"><label>Target City</label><input type="text" id="emCity" placeholder="City Name"></div>
+        <div class="form-group"><label>Blood Group</label><select id="emGroup"><option>A+</option><option>B+</option><option>O+</option><option>AB+</option><option>A-</option><option>B-</option><option>O-</option><option>AB-</option></select></div>
+        <button class="btn" style="background:red" onclick="runEmergencySearch()">Find Help Now</button>
+    </div>
+</div>
+
+<div id="emResultModal" class="modal">
+    <div class="modal-content" style="max-width: 800px; width: 92%;">
+        <span class="close-modal" onclick="document.getElementById('emResultModal').style.display='none'">&times;</span>
+        <h2 id="emResultTitle" style="color:red; border-bottom: 2px solid red; padding-bottom: 10px; font-size: 1.2rem;">Emergency Hub</h2>
+        <div id="emResultsArea" style="max-height: 60vh; overflow-y: auto;"></div>
+        <button class="btn" onclick="document.getElementById('emResultModal').style.display='none'">Close</button>
+    </div>
+</div>
+
+<div class="container">
+    <section id="search-view" class="view-section active">
+        <div class="card">
+            <h3>Find Blood Group</h3>
+            <div class="form-group"><label>City</label><input type="text" id="sCity" placeholder="Enter City"></div>
+            <div class="form-group"><label>Blood Group</label><select id="sGroup"><option>A+</option><option>B+</option><option>O+</option><option>AB+</option><option>A-</option><option>B-</option><option>O-</option><option>AB-</option></select></div>
+            <button class="btn" onclick="runGlobalSearch()">Search Now</button>
+            <div id="resultsArea"></div>
+        </div>
+    </section>
+
+    <section id="reg-donor-view" class="view-section">
+        <div class="card">
+            <h3>Register as Donor</h3>
+            <form id="donorRegForm">
+                <div class="form-group"><label>Full Name</label><input type="text" id="rdName" required></div>
+                <div class="form-group"><label>Blood Group</label><select id="rdGroup"><option>A+</option><option>B+</option><option>O+</option><option>AB+</option><option>A-</option><option>B-</option><option>O-</option><option>AB-</option></select></div>
+                <div class="form-group"><label>City</label><input type="text" id="rdCity" required></div>
+                <div class="form-group"><label>Phone Number</label><input type="tel" id="rdPhone" required></div>
+                <button type="submit" class="btn">Register</button>
+            </form>
+        </div>
+    </section>
+
+    <section id="reg-admin-view" class="view-section">
+        <div class="card">
+            <h3>Admin Registration</h3>
+            <div class="form-group"><label>Register As</label><select id="raType"><option value="bank">Blood Bank</option><option value="hospital">Hospital</option></select></div>
+            <div class="form-group"><label>Full Name</label><input type="text" id="raName"></div>
+            <div class="form-group"><label>City</label><input type="text" id="raCity"></div>
+            <div class="form-group"><label>Admin Password (777, 888, 999)</label><input type="password" id="raPass"></div>
+            <div class="form-group"><label>Phone</label><input type="tel" id="raPhone"></div>
+            <button class="btn" style="background:#444" onclick="registerAdminEntity()">Create Admin Account</button>
+        </div>
+    </section>
+
+    <section id="login-view" class="view-section">
+        <div class="card">
+            <h3>Portal Login</h3>
+            <div class="form-group"><label>Role</label><select id="lpRole" onchange="toggleLoginPass()"><option value="donor">Donor</option><option value="bank">Blood Bank Admin</option><option value="hospital">Hospital Admin</option></select></div>
+            <div class="form-group" id="lpNameGroup" style="display:none;"><label>Registered Name</label><input type="text" id="lpName"></div>
+            <div class="form-group"><label>Phone Number</label><input type="tel" id="lpPhone"></div>
+            <div class="form-group" id="lpPassGroup" style="display:none;"><label>Password</label><input type="password" id="lpPass"></div>
+            <button class="btn" onclick="executeLogin()">Login</button>
+        </div>
+    </section>
+
+    <section id="donor-dash" class="view-section"><div class="card" id="donorDashContent"></div></section>
+    
+    <section id="bank-dash" class="view-section">
+        <div class="card">
+            <h2 id="bankDashName">Bank</h2>
+            <div class="form-group"><label>Blood Group</label><select id="stkGroup"><option>A+</option><option>B+</option><option>O+</option><option>AB+</option><option>A-</option><option>B-</option><option>O-</option><option>AB-</option></select></div>
+            <div class="form-group"><label>Stock (Units)</label><input type="number" id="stkQty"></div>
+            <button class="btn" onclick="updateStock()">Save Stock</button>
+            <button class="btn" style="background:#555" onclick="location.reload()">Logout</button>
+        </div>
+    </section>
+
+    <section id="hospital-dash" class="view-section">
+        <div class="card">
+            <h2 id="hospDashName">Hospital</h2>
+            <div class="form-group"><label>Donor Search (Phone)</label><input type="tel" id="vhPhone"></div>
+            <button class="btn" style="background:var(--hosp)" onclick="hospSearchDonors()">Find Profiles</button>
+            <div id="hospResArea"></div>
+            <button class="btn" style="background:#555; margin-top:20px;" onclick="location.reload()">Logout</button>
+        </div>
+    </section>
+</div>
+
+<button class="emergency-btn" onclick="document.getElementById('emModal').style.display='block'">🚨 EMERGENCY SEARCH</button>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, getDocs, query, where, updateDoc, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyDMB_64CilXk7emYV8dzZ1fTGliE6S0w7o",
+        authDomain: "raktha-sethu-a7284.firebaseapp.com",
+        projectId: "raktha-sethu-a7284",
+        storageBucket: "raktha-sethu-a7284.firebasestorage.app",
+        messagingSenderId: "562792345820",
+        appId: "1:562792345820:web:d6c45f897c096bb2188419"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    let currentUser = null;
+
+    window.showTab = (name) => {
+        document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        const target = document.getElementById(name + '-view');
+        if(target) target.classList.add('active');
+        event.currentTarget.classList.add('active');
+    };
+
+    window.toggleLoginPass = () => {
+        const role = document.getElementById('lpRole').value;
+        const isDonor = (role === 'donor');
+        document.getElementById('lpPassGroup').style.display = isDonor ? 'none' : 'block';
+        document.getElementById('lpNameGroup').style.display = isDonor ? 'none' : 'block';
+    };
+
+    window.runEmergencySearch = async () => {
+        const city = document.getElementById('emCity').value.toLowerCase().trim();
+        const grp = document.getElementById('emGroup').value;
+        if(!city) return alert("Enter a city.");
+
+        document.getElementById('emModal').style.display = 'none';
+        document.getElementById('emResultModal').style.display = 'block';
+        document.getElementById('emResultTitle').innerText = `Help for ${grp} in ${city.toUpperCase()}`;
+        
+        const resArea = document.getElementById('emResultsArea');
+        resArea.innerHTML = "<p>Searching database...</p>";
+
+        const dq = query(collection(db, "donors"), where("city", "==", city), where("group", "==", grp));
+        const bq = query(collection(db, "banks"), where("city", "==", city));
+        const hq = query(collection(db, "hospitals"), where("city", "==", city));
+
+        const [ds, bs, hs] = await Promise.all([getDocs(dq), getDocs(bq), getDocs(hq)]);
+        
+        let html = "<h4>Donors</h4>";
+        if(ds.empty) html += "<p>No donors found.</p>";
+        ds.forEach(doc => {
+            const d = doc.data();
+            html += `<div class="result-item"><b>${d.name}</b><br>📞 ${d.phone} <br> <a href="https://wa.me/${d.phone}" target="_blank" class="wa-link">WhatsApp</a></div>`;
+        });
+
+        html += "<h4>Blood Banks</h4>";
+        let foundBank = false;
+        bs.forEach(doc => {
+            const b = doc.data();
+            if(b.stock && b.stock[grp] > 0) {
+                foundBank = true;
+                html += `<div class="result-item" style="border-left-color:orange"><b>${b.name}</b><br>🩸 ${b.stock[grp]} Units available<br>📞 ${b.phone}</div>`;
+            }
+        });
+        if(!foundBank) html += "<p>No banks with stock found.</p>";
+
+        html += "<h4>Hospitals</h4>";
+        if(hs.empty) html += "<p>No hospitals found.</p>";
+        hs.forEach(doc => {
+            const h = doc.data();
+            html += `<div class="result-item" style="border-left-color:var(--hosp)"><b>${h.name.toUpperCase()}</b><br>📞 ${h.phone}</div>`;
+        });
+
+        resArea.innerHTML = html;
+    };
+
+    window.registerAdminEntity = async () => {
+        const type = document.getElementById('raType').value;
+        const name = document.getElementById('raName').value.trim();
+        const city = document.getElementById('raCity').value.toLowerCase().trim();
+        const pass = document.getElementById('raPass').value.trim();
+        const phone = document.getElementById('raPhone').value.trim();
+
+        if(!['777','888','999'].includes(pass)) return alert("Use valid admin password.");
+        const q = query(collection(db, type + "s"), where("city", "==", city));
+        const snap = await getDocs(q);
+        if(snap.size >= 3) return alert("City limit reached.");
+        
+        let dupPass = false;
+        snap.forEach(doc => { if(doc.data().password === pass) dupPass = true; });
+        if(dupPass) return alert("Password taken in this city.");
+
+        await addDoc(collection(db, type + "s"), { name, city, password: pass, phone, stock: {} });
+        alert("Registered!");
+    };
+
+    document.getElementById('donorRegForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        await addDoc(collection(db, "donors"), {
+            name: document.getElementById('rdName').value,
+            group: document.getElementById('rdGroup').value,
+            city: document.getElementById('rdCity').value.toLowerCase().trim(),
+            phone: document.getElementById('rdPhone').value,
+            donations: 0
+        });
+        alert("Successfully Registered!"); showTab('login');
+    });
+
+    window.executeLogin = async () => {
+        const role = document.getElementById('lpRole').value;
+        const phone = document.getElementById('lpPhone').value.trim();
+        const name = document.getElementById('lpName').value.trim();
+        const pass = document.getElementById('lpPass').value.trim();
+        let q;
+        if(role === 'donor') q = query(collection(db, "donors"), where("phone", "==", phone));
+        else q = query(collection(db, role + "s"), where("phone", "==", phone), where("name", "==", name));
+        
+        const snap = await getDocs(q);
+        if(snap.empty) return alert("Account not found.");
+        const uDoc = snap.docs[0];
+        const data = uDoc.data();
+        if(role !== 'donor' && data.password !== pass) return alert("Incorrect Password.");
+        currentUser = { id: uDoc.id, ...data, role };
+        renderDashboard();
+    };
+
+    function renderDashboard() {
+        document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
+        if(currentUser.role === 'donor') {
+            document.getElementById('donor-dash').classList.add('active');
+            document.getElementById('donorDashContent').innerHTML = `<h2>Hero: ${currentUser.name}</h2><p>Blood Group: ${currentUser.group}</p><h3>Total Donations: ${currentUser.donations || 0}</h3>`;
+        } else {
+            document.getElementById(currentUser.role + '-dash').classList.add('active');
+            document.getElementById(currentUser.role + 'DashName').innerText = currentUser.name;
+        }
+    }
+
+    window.hospSearchDonors = async () => {
+        const phone = document.getElementById('vhPhone').value.trim();
+        const q = query(collection(db, "donors"), where("phone", "==", phone));
+        const snap = await getDocs(q);
+        const area = document.getElementById('hospResArea');
+        area.innerHTML = "<h4>Matched Donors:</h4>";
+        snap.forEach(dDoc => {
+            area.innerHTML += `<div class="card" style="padding:15px; border-top: 3px solid green;"><b>${dDoc.data().name}</b> (${dDoc.data().group})<br><button class="btn" onclick="confirmDonationAction('${dDoc.id}')">Confirm Donation</button></div>`;
+        });
+    };
+
+    window.confirmDonationAction = async (id) => {
+        const dRef = doc(db, "donors", id);
+        const dSnap = await getDoc(dRef);
+        await updateDoc(dRef, { donations: (dSnap.data().donations || 0) + 1 });
+        alert("Donation Recorded!"); hospSearchDonors();
+    };
+
+    window.updateStock = async () => {
+        const g = document.getElementById('stkGroup').value;
+        const q = document.getElementById('stkQty').value;
+        let s = currentUser.stock || {}; s[g] = q;
+        await updateDoc(doc(db, "banks", currentUser.id), { stock: s });
+        alert("Stock Updated!");
+    };
+
+    window.runGlobalSearch = async () => {
+        const city = document.getElementById('sCity').value.toLowerCase().trim();
+        const grp = document.getElementById('sGroup').value;
+        const res = document.getElementById('resultsArea');
+        res.innerHTML = "Searching...";
+        const dq = query(collection(db, "donors"), where("city", "==", city), where("group", "==", grp));
+        const bq = query(collection(db, "banks"), where("city", "==", city));
+        const [ds, bs] = await Promise.all([getDocs(dq), getDocs(bq)]);
+        res.innerHTML = `<h3>Hub: ${city.toUpperCase()}</h3>`;
+        ds.forEach(doc => { res.innerHTML += `<div class="result-item"><b>${doc.data().name}</b><br>📞 ${doc.data().phone}</div>`; });
+        bs.forEach(doc => {
+            const b = doc.data();
+            if(b.stock && b.stock[grp] > 0) res.innerHTML += `<div class="result-item" style="border-left-color:orange"><b>Bank: ${b.name}</b><br>Units: ${b.stock[grp]}</div>`;
+        });
+    };
+</script>
+</body>
+</html>
